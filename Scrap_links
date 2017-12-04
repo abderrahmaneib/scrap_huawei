@@ -1,0 +1,25 @@
+import urllib
+from bs4 import BeautifulSoup
+
+
+base="http://www.huawei.com"
+def make_soup(url):
+	thepage = urllib.urlopen(url)
+	soupdata = BeautifulSoup(thepage, "html.parser")
+	return soupdata
+
+soup = make_soup("http://www.huawei.com/en/psirt/security-advisories")
+info_total=""
+for record in soup.findAll('tr'):
+	info=""
+	for data in record.findAll('td'):
+		site = data.find('a', href=True)
+		if (site):
+			info = info + base +site['href'] 
+		info = info + "," + data.text.strip()
+		 
+	info_total = info_total + '\n' + info
+
+print (info_total)
+
+
