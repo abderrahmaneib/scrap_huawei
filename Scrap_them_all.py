@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[13]:
+# In[1]:
 
 
 from selenium import webdriver
@@ -11,7 +11,9 @@ from time import sleep
 import pandas as pd 
 
 
-# In[14]:
+# ## Loading the web page and click on more 
+
+# In[2]:
 
 
 def load_root_page (url,chrome_path,nombre):
@@ -21,6 +23,7 @@ def load_root_page (url,chrome_path,nombre):
 	chrome_options.add_argument("--headless")
 	driver = webdriver.Chrome(chrome_path, chrome_options=chrome_options)
 	driver.get(url)
+# nombre is number of clicks to make on the more button in the web page each click generates 9 more articles
 	for i in range(nombre):
 		moreButton = driver.find_element_by_css_selector("#psirtMore > a")
 		moreButton.click()
@@ -29,36 +32,40 @@ def load_root_page (url,chrome_path,nombre):
 	return soup
 
 
-# In[15]:
+# ## Lists all links and scrap them
+
+# In[3]:
 
 
 def scrap_root_page(soup):
-    for record in soup.findAll('tr'):
+    for record in soup.findAll('tr'): #look for the liste table in the source
         i=0
-        for data in record.findAll('td'):
-            site = data.find('a', href=True)
+        for data in record.findAll('td'): #write them in the center 
+            site = data.find('a', href=True) #
             if (i==0):
-                center[i] = base + site['href']
+                center[i] = base + site['href'] #give the url of the article
                 i+=1
             else:
                 center[i] = data.text.strip() 
                 center[i] = center [i]
                 i+=1
         if center[0] is not None:
-            scrap_article(center[0],center)
+            scrap_article(center[0],center) #scrap the article and write it in the center
             if not(all(v is None for v in center)):
                 df_centers.loc[len(df_centers.index)] = center
 
 
-# In[16]:
+# ## Function to scrap one article
+
+# In[4]:
 
 
 def scrap_article(url,center):
     thepage = urllib.urlopen(url)
     soup = BeautifulSoup(thepage, "html.parser")
-    all_details = soup.findAll('div',attrs={'class':'psirt-set-out'})
-    i=3
-    for detail in all_details:
+    all_details = soup.findAll('div',attrs={'class':'psirt-set-out'}) #All information needed is in this class
+    i=3 # the first 3 elements are written from the list page 
+    for detail in all_details: # write all the information
         contenu =  detail.find('div',attrs={'class':'moreinfo'})
         tableau = contenu.findAll('tr')
         if tableau:
@@ -69,10 +76,13 @@ def scrap_article(url,center):
         i+=1
 
 
-# In[17]:
+# ### Function to scrap the Software affected and its versions
+
+# In[5]:
 
 
-def scrap_tableau_details(tableau):
+#this table is written in the center as multiple lines as follows [product names, version1; version 2 etc...,upgrade version]
+def scrap_tableau_details(tableau): 
     infos=["Prodcut Name","Versions","Upgrade"]
     info_totale=""
     for ligne in tableau[1:]:
@@ -90,14 +100,18 @@ def scrap_tableau_details(tableau):
     return info_totale 
 
 
-# In[18]:
+# ## Create the Dataframe Columns 
+
+# In[6]:
 
 
 df_centers = pd.DataFrame(columns=['Url', 'Title', 'Version','Summary','Software Versions and Fixes','Affected Versions','Resolved product and Version','Impact','Vulnerability Scoring Details','Technique Details','Temporary Fix','Obtaining Fixed Software','Source','Revision History','FAQs','Huawei Security Procedures','Declaration'])
 center = [None] * 17
 
 
-# In[19]:
+# ## Initialize parameters
+
+# In[7]:
 
 
 url="http://www.huawei.com/en/psirt/security-advisories"
@@ -105,20 +119,24 @@ chrome_path="/Users/abderrahmane/Desktop/Divers/scrap/chromedriver"
 base="http://www.huawei.com"
 
 
-# In[20]:
+# In[9]:
 
 
-soup=load_root_page(url,chrome_path,2)
+#choose the number of clicks on the more button according to the need
+nombre=5
+soup=load_root_page(url,chrome_path,nombre)
 
 
-# In[21]:
+# In[10]:
 
 
-liste=scrap_root_page(soup)
+#starts scraping and crawling
+liste=scrap_root_page(soup) 
 
 
-# In[22]:
+# In[11]:
 
 
+#write results in excel sheet
 df_centers.to_excel('Security_list.xlsx')
 
