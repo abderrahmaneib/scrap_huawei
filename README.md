@@ -8,3 +8,8 @@ Chrome_path should be changed in the line 118.
 
 Expect the results to be generated as Excel file named Security_list.xlsx
 
+The program uses the following libraries
+beautifulsoup4==4.6.0
+pandas==0.20.3
+selenium==3.8.0
+urllib3==1.22
