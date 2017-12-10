@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[13]:
 
 
 from selenium import webdriver
@@ -11,7 +11,7 @@ from time import sleep
 import pandas as pd 
 
 
-# In[2]:
+# In[14]:
 
 
 def load_root_page (url,chrome_path,nombre):
@@ -29,7 +29,7 @@ def load_root_page (url,chrome_path,nombre):
 	return soup
 
 
-# In[3]:
+# In[15]:
 
 
 def scrap_root_page(soup):
@@ -38,20 +38,19 @@ def scrap_root_page(soup):
         for data in record.findAll('td'):
             site = data.find('a', href=True)
             if (i==0):
-                #print (base + site['href'])
                 center[i] = base + site['href']
                 i+=1
             else:
-                center[i] = data.text.lstrip() 
+                center[i] = data.text.strip() 
+                center[i] = center [i]
                 i+=1
-        print (center[0])
         if center[0] is not None:
             scrap_article(center[0],center)
             if not(all(v is None for v in center)):
                 df_centers.loc[len(df_centers.index)] = center
 
 
-# In[4]:
+# In[16]:
 
 
 def scrap_article(url,center):
@@ -60,37 +59,45 @@ def scrap_article(url,center):
     all_details = soup.findAll('div',attrs={'class':'psirt-set-out'})
     i=3
     for detail in all_details:
-        print i
-        #print detail.find('div', attrs={'class':'expand-moreb'}).text.strip()
         contenu =  detail.find('div',attrs={'class':'moreinfo'})
         tableau = contenu.findAll('tr')
         if tableau:
-            center[i]="fe"
+            center[i]=scrap_tableau_details(tableau)
             i+=1
             continue
-        '''
-            table="("
-            for ligne in tableau:
-                data=""
-                champs = ligne.findAll('td')
-                for champ in champs:
-                    data = data + "," + champ.text.strip()
-                table = table + ";" + data[1:]
-            table = table + ")"
-            all_content = all_content + "," + table
-            ''' 
         center[i] = contenu.text.strip()
         i+=1
 
 
-# In[5]:
+# In[17]:
 
 
-df_centers = pd.DataFrame(columns=['Url', 'Title', 'Version','Summary','Software Versions and Fixes','Impact','Vulnerability Scoring Details','Technique Details','Temporary Fix','Obtaining Fixed Software','Source','Revision History','FAQs','Huawei Security Procedures','Declaration'])
-center = [None] * 15
+def scrap_tableau_details(tableau):
+    infos=["Prodcut Name","Versions","Upgrade"]
+    info_totale=""
+    for ligne in tableau[1:]:
+            champs = ligne.findAll('td')
+            if len(champs) == 3:
+                info_totale = info_totale + "[" + infos[0] + "," + infos[1] + "," + infos[2] + "]" + "\n"
+                infos=["","",""]
+                i=0
+                for champ in champs:
+                    infos[i]=champ.text.strip()
+                    i+=1    
+            else:
+                for champ in champs:
+                    infos[1]=infos[1]+ "; " +champ.text.strip()
+    return info_totale 
 
 
-# In[6]:
+# In[18]:
+
+
+df_centers = pd.DataFrame(columns=['Url', 'Title', 'Version','Summary','Software Versions and Fixes','Affected Versions','Resolved product and Version','Impact','Vulnerability Scoring Details','Technique Details','Temporary Fix','Obtaining Fixed Software','Source','Revision History','FAQs','Huawei Security Procedures','Declaration'])
+center = [None] * 17
+
+
+# In[19]:
 
 
 url="http://www.huawei.com/en/psirt/security-advisories"
@@ -98,26 +105,20 @@ chrome_path="/Users/abderrahmane/Desktop/Divers/scrap/chromedriver"
 base="http://www.huawei.com"
 
 
-# In[9]:
+# In[20]:
 
 
 soup=load_root_page(url,chrome_path,2)
 
 
-# In[10]:
+# In[21]:
 
 
 liste=scrap_root_page(soup)
 
 
-# In[11]:
+# In[22]:
 
 
-df_centers
-
-
-# In[12]:
-
-
-df_centers.to_excel('hello2.xlsx')
+df_centers.to_excel('Security_list.xlsx')
 
