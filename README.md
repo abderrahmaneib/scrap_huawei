@@ -1,15 +1,3 @@
-# Internship Application README
-
-Hello QuarksLab !
-
-My name is Abderrahmane IBN SEDDIK, and I'll be more than excited to work with you guys.
-
-I'll be waiting for your feedback.
-
-I hope we'll stay in touch !
-
-Cheers,
-
 # Program README
 
 This program crawls Huawei's security bulletin articles and writes down the articles in a excel format.
