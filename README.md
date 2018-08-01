@@ -1,4 +1,4 @@
-# Program README
+# README
 
 This program crawls Huawei's security bulletin articles and writes down the articles in a excel format.
 
